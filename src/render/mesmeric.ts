@@ -125,50 +125,244 @@ const MODE_CONFIGS: Record<MesmericMode, ModeParams> = {
 // =============================================================================
 // CHARACTER FACES FOR OVERLAY
 // =============================================================================
+// Each face is designed to match the vibe of its wave pattern
+// The face art uses characters that complement the wave palette
 
 interface FaceConfig {
-  eyes: string[];
-  mouth: string[];
-  blinkChance: number;
+  // Multi-line face art (will be centered in the grid)
+  lines: string[];
+  // Animated variants (cycled based on time)
+  variants?: string[][];
+}
+
+// Helper to get animated frame
+function getAnimFrame(time: number, frameCount: number): number {
+  return Math.floor((time * 2) % frameCount);
 }
 
 const FACES: Record<MesmericMode, FaceConfig> = {
+  // IDLE: Relaxed, peaceful - matches soft flowing waves
   IDLE: {
-    eyes: ['o', 'o'],
-    mouth: ['v'],
-    blinkChance: 0.05,
+    lines: [
+      '  ·  ☁  ·  ',
+      ' ( ◠ ‿ ◠ ) ',
+      '    ╱╲     ',
+      '   ╱  ╲    ',
+    ],
+    variants: [
+      [
+        '  ·  ☁  ·  ',
+        ' ( ◠ ‿ ◠ ) ',
+        '    ╱╲     ',
+        '   ╱  ╲    ',
+      ],
+      [
+        '   · ☁ ·   ',
+        ' ( ◠ ◡ ◠ ) ',
+        '    ╱╲     ',
+        '   ╱  ╲    ',
+      ],
+    ],
   },
+
+  // SCAN: Alert, searching - matches matrix ripples
   SCAN: {
-    eyes: ['◉', '◉'],
-    mouth: ['─'],
-    blinkChance: 0.02,
+    lines: [
+      '   ◢▓▓◣    ',
+      '  ┃◉  ◉┃   ',
+      '  ┃  ▽ ┃   ',
+      '   ◥▓▓◤    ',
+    ],
+    variants: [
+      [
+        '   ◢▓▓◣    ',
+        '  ┃◉  ◉┃ ◂ ',
+        '  ┃  ─ ┃   ',
+        '   ◥▓▓◤    ',
+      ],
+      [
+        '   ◢▓▓◣    ',
+        ' ▸┃◉  ◉┃   ',
+        '  ┃  ─ ┃   ',
+        '   ◥▓▓◤    ',
+      ],
+      [
+        '   ◢▓▓◣    ',
+        '  ┃◉  ◉┃   ',
+        '  ┃  ─ ┃ ◂ ',
+        '   ◥▓▓◤    ',
+      ],
+    ],
   },
+
+  // BUILD: Focused, constructive - matches rising waves
   BUILD: {
-    eyes: ['•', '•'],
-    mouth: ['O'],
-    blinkChance: 0.03,
+    lines: [
+      '    ╭━━╮   ',
+      '   (•̀ᴗ•́)  ',
+      '   ⌨️💨    ',
+      '    ┗━┛    ',
+    ],
+    variants: [
+      [
+        '    ╭━━╮   ',
+        '   (•̀ᴗ•́)  ',
+        '  ⌨️ 💨    ',
+        '    ┗━┛    ',
+      ],
+      [
+        '    ╭━━╮ ✨',
+        '   (•̀_•́)  ',
+        '   ⌨️💨    ',
+        '    ┗━┛    ',
+      ],
+      [
+        '   ✨╭━━╮  ',
+        '   (•̀ᴗ•́)  ',
+        '    ⌨️ 💨  ',
+        '    ┗━┛    ',
+      ],
+    ],
   },
+
+  // CRUNCH: Intense, processing - matches fire patterns
   CRUNCH: {
-    eyes: ['×', '×'],
-    mouth: ['w'],
-    blinkChance: 0.1,
+    lines: [
+      '  ░▒▓██▓▒░ ',
+      '   (×_×)   ',
+      '   /█▓█\\   ',
+      '  ▓▒░░░▒▓  ',
+    ],
+    variants: [
+      [
+        '  ░▒▓██▓▒░ ',
+        '   (×_×)   ',
+        '   /█▓█\\   ',
+        '  ▓▒░ ░▒▓  ',
+      ],
+      [
+        '  ▒▓██▓▓▒░ ',
+        '   (×_×) ⚡',
+        '   /▓█▓\\   ',
+        '  ░▒░ ░░▒  ',
+      ],
+      [
+        '  ░▓▓██▓▒  ',
+        ' ⚡(×_×)   ',
+        '   /█▓█\\   ',
+        '  ▒░░ ░▒▓  ',
+      ],
+    ],
   },
+
+  // SUCCESS: Celebrating - matches calm expanding waves
   SUCCESS: {
-    eyes: ['★', '★'],
-    mouth: ['∀'],
-    blinkChance: 0.0,
+    lines: [
+      ' ✨ 🎉 ✨  ',
+      '  \\(★‿★)/ ',
+      '    ┃┃     ',
+      '   ╱  ╲    ',
+    ],
+    variants: [
+      [
+        ' ✨ 🎉 ✨  ',
+        '  \\(★‿★)/ ',
+        '    ┃┃     ',
+        '   ╱  ╲    ',
+      ],
+      [
+        '  ✨🎊✨   ',
+        ' \\(☆ω☆)/  ',
+        '    ┃┃     ',
+        '   ╱  ╲    ',
+      ],
+      [
+        ' 🎉 ✨ 🎊 ',
+        '  \\(★ω★)/ ',
+        '    ┃┃     ',
+        '   ╱  ╲    ',
+      ],
+    ],
   },
+
+  // SLEEP: Peaceful, dreaming - matches gentle water waves
   SLEEP: {
-    eyes: ['－', '－'],
-    mouth: ['z'],
-    blinkChance: 0.0,
+    lines: [
+      '   ☾ · ⭐  ',
+      '  (－‿－)  ',
+      '    zzz    ',
+      ' ～～～～～',
+    ],
+    variants: [
+      [
+        '   ☾ · ⭐  ',
+        '  (－‿－)  ',
+        '    z      ',
+        ' ～～～～～',
+      ],
+      [
+        '   ☾ ·  ⭐ ',
+        '  (－‿－)  ',
+        '    zz     ',
+        ' ～～～～～',
+      ],
+      [
+        '   ☾  · ⭐ ',
+        '  (－‿－)  ',
+        '    zzz    ',
+        ' ～～～～～',
+      ],
+      [
+        '  ☾   ·  ⭐',
+        '  (－‿－)  ',
+        '    zzzz   ',
+        ' ～～～～～',
+      ],
+    ],
   },
+
+  // PRESSURE: Stressed, overwhelmed - matches chaotic flames
   PRESSURE: {
-    eyes: ['◎', '◎'],
-    mouth: ['△'],
-    blinkChance: 0.2,
+    lines: [
+      ' 🔥 ⚠️ 🔥 ',
+      '  (°□°;)   ',
+      '   /██\\💦 ',
+      ' ▓█▓▓▓▓█▓  ',
+    ],
+    variants: [
+      [
+        ' 🔥 ⚠️ 🔥 ',
+        '  (°□°;)   ',
+        '  /██\\ 💦 ',
+        ' ▓█▓▓▓▓█▓  ',
+      ],
+      [
+        '  🔥⚠️🔥  ',
+        '  (°△°;)💦 ',
+        '   /██\\   ',
+        ' █▓▓▓▓▓▓█  ',
+      ],
+      [
+        ' 🔥 ⚠️ 🔥 ',
+        ' 💦(>_<;)  ',
+        '   /██\\   ',
+        ' ▓▓█▓▓█▓▓  ',
+      ],
+    ],
   },
 };
+
+/**
+ * Get face lines for current mode and time
+ */
+function getFaceLines(mode: MesmericMode, time: number): string[] {
+  const face = FACES[mode];
+  if (face.variants && face.variants.length > 0) {
+    const frameIdx = getAnimFrame(time, face.variants.length);
+    return face.variants[frameIdx];
+  }
+  return face.lines;
+}
 
 // =============================================================================
 // WAVE MATHEMATICS
@@ -272,40 +466,31 @@ function generateGrid(mode: MesmericMode, time: number): string[][] {
 
 /**
  * Overlay the character face onto the grid
+ * The face is centered and uses mode-specific animated expressions
  */
 function overlayFace(grid: string[][], mode: MesmericMode, time: number): void {
-  const face = FACES[mode];
+  const faceLines = getFaceLines(mode, time);
   const centerX = Math.floor(WIDTH / 2);
   const centerY = Math.floor(HEIGHT / 2);
 
-  // Determine if blinking
-  const blink = Math.sin(time * 0.5) > (1 - face.blinkChance * 20);
-  const eyes = blink ? ['－', '－'] : face.eyes;
+  // Calculate starting position to center the face
+  const startY = centerY - Math.floor(faceLines.length / 2);
 
-  // Build face lines
-  // Line -2: Top of head
-  const topLine = '╭───────╮';
-  // Line -1: Eyes
-  const eyesLine = `│ ${eyes[0]}   ${eyes[1]} │`;
-  // Line 0: Mouth
-  const mouthLine = `│   ${face.mouth[0]}   │`;
-  // Line 1: Bottom of head
-  const bottomLine = '╰───────╯';
-
-  const faceLines = [topLine, eyesLine, mouthLine, bottomLine];
-  const startY = centerY - 2;
-
-  // Clear space for face and overlay
+  // Overlay each line of the face
   for (let i = 0; i < faceLines.length; i++) {
     const y = startY + i;
-    if (y >= 0 && y < HEIGHT) {
+    if (y >= 0 && y < HEIGHT - 1) { // Leave room for status bar
       const line = faceLines[i];
+      // Calculate visible character width (accounting for emojis being 2 chars wide visually)
       const startX = centerX - Math.floor(line.length / 2);
-      for (let j = 0; j < line.length; j++) {
-        const x = startX + j;
-        if (x >= 0 && x < WIDTH) {
-          grid[y][x] = line[j];
+
+      // Write each character
+      let xPos = startX;
+      for (const char of line) {
+        if (xPos >= 0 && xPos < WIDTH) {
+          grid[y][xPos] = char;
         }
+        xPos++;
       }
     }
   }
@@ -473,6 +658,17 @@ export function renderMesmericFull(ctx: RenderContext): string | null {
   return lines.join('\n');
 }
 
+// Compact face expressions for single-line mode
+const COMPACT_FACES: Record<MesmericMode, string[]> = {
+  IDLE: ['(◠‿◠)', '(◠◡◠)'],
+  SCAN: ['(◉_◉)', '(◉‿◉)'],
+  BUILD: ['(•̀ᴗ•́)', '(•̀_•́)'],
+  CRUNCH: ['(×_×)', '(×‿×)'],
+  SUCCESS: ['(★‿★)', '(☆ω☆)'],
+  SLEEP: ['(－‿－)', '(－_－)'],
+  PRESSURE: ['(°□°)', '(>_<)'],
+};
+
 /**
  * Render compact mesmeric visualization
  * Single line with animated pattern
@@ -483,7 +679,7 @@ export function renderMesmericCompact(ctx: RenderContext): string | null {
   const time = Date.now() * params.velocity * 0.001;
 
   // Generate a single-line wave pattern
-  const compactWidth = 30;
+  const compactWidth = 25;
   let pattern = '';
 
   for (let x = 0; x < compactWidth; x++) {
@@ -491,11 +687,10 @@ export function renderMesmericCompact(ctx: RenderContext): string | null {
     pattern += valueToChar(value, params.palette);
   }
 
-  // Get face for mode
-  const face = FACES[mode];
-  const blink = Math.sin(time * 0.5) > 0.95;
-  const eyes = blink ? '－－' : face.eyes.join('');
-  const faceStr = `(${eyes})`;
+  // Get animated compact face for mode
+  const faces = COMPACT_FACES[mode];
+  const frameIdx = getAnimFrame(time, faces.length);
+  const faceStr = faces[frameIdx];
 
   return `${params.colorFn(pattern)} ${faceStr} ${dim(detail)}`;
 }
