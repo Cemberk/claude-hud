@@ -102,19 +102,38 @@ Enable entertaining animations that change based on Claude's activity:
 ```bash
 # Enable via environment variable in settings.json statusLine config
 CLAUDE_HUD_ANIMATE=1
+
+# Optional: Use compact single-line mode instead of full multi-line
+CLAUDE_HUD_COMPACT=1
 ```
 
-Animation states:
-- 😴 **Idle**: Sleeping animation when waiting for input
-- (◠‿◠) **Thinking**: Processing between tool calls
-- ◉_◉ 📖 **Reading**: Scanning files (Read, Glob, ls)
-- ✍️ **Writing**: Editing files (Write, Edit, MultiEdit)
-- 🔍 **Searching**: Grep, search operations
-- 🤖 **Agent**: Subagent running
-- ▶ **Bash**: Terminal command executing
-- 🌐 **Fetch**: Web requests
-- 🔥 **Pressure**: Context usage >90%
-- ✨ **Success**: Task completion celebration
+### Tamagotchi Display (Full Mode)
+
+The full animation mode displays a 4-line ASCII character scene that changes based on activity:
+
+```
+    ☾   ⭐
+   (－‿－) zzz
+    /|__|\\
+   ～～～～～
+─ Waiting for input
+```
+
+### Animation States
+
+| State | Character | Trigger |
+|-------|-----------|---------|
+| 😴 Sleeping | `(－‿－) zzz` | Waiting for input |
+| ☁️ Idle | `(◠‿◠) ♪` | Ready, no activity |
+| 💭 Thinking | `(°ー°) ???` | Processing between tools |
+| 📖 Reading | `◉_◉` scanning | Read, Glob, ls |
+| ✍️ Writing | `(•̀ᴗ•́)` at screen | Write, Edit, MultiEdit |
+| 🔍 Searching | Moving magnifier | Grep, search operations |
+| 🤖 Agent | Robot spawning | Task subagent running |
+| ▶ Bash | Terminal progress | Shell command executing |
+| 🌐 Fetch | Data flowing | Web requests |
+| 🔥 Pressure | `(×_×) 💦` stressed | Context usage >90% |
+| 🎉 Success | `\\(★‿★)/` celebrating | Task completion |
 
 Animations are time-based (derived from `Date.now()`) to work with the stateless ~300ms invocation cycle.
 

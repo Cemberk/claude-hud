@@ -1,164 +1,575 @@
 import { cyan, yellow, green, magenta, dim, red } from './colors.js';
-// Animation frame timing - derived from Date.now() for stateless operation
-const FRAME_DURATION = 150; // ms per frame
+// =============================================================================
+// TAMAGOTCHI-STYLE LIVING CHARACTER ANIMATION SYSTEM
+// =============================================================================
+// A little coding companion that lives in your terminal and reacts to Claude's
+// activity with continuous, entertaining animations.
+// =============================================================================
+const FRAME_MS = 120; // Base frame duration in milliseconds
 /**
- * Get current animation frame index based on time
+ * Get current animation frame index based on time (stateless)
  */
-export function getFrame(frameCount, speed = 1) {
+export function getFrame(frameCount, speedMultiplier = 1) {
     const now = Date.now();
-    return Math.floor((now / (FRAME_DURATION / speed)) % frameCount);
+    return Math.floor((now / (FRAME_MS / speedMultiplier)) % frameCount);
 }
 /**
- * Get frame based on a specific start time (for tool/agent-specific animations)
+ * Get a secondary offset frame for layered animations
  */
-export function getFrameFromStart(startTime, frameCount, speed = 1) {
-    const elapsed = Date.now() - startTime.getTime();
-    return Math.floor((elapsed / (FRAME_DURATION / speed)) % frameCount);
+export function getOffsetFrame(frameCount, offset = 0) {
+    const now = Date.now() + offset * 1000;
+    return Math.floor((now / FRAME_MS) % frameCount);
 }
-// ============================================================================
-// ASCII Art Animations - Different states get different animations
-// ============================================================================
-// Thinking/Idle animation - brain processing
-const THINKING_FRAMES = [
-    '(◠‿◠)',
-    '(◠‿◠)',
-    '(◠_◠)',
-    '(◠_◠)',
-    '(◠‿◠)',
-    '(◠‿◠)',
-    '(˘◡˘)',
-    '(˘◡˘)',
-];
-// Reading/Scanning animation - eyes moving
-const READING_FRAMES = [
-    '◉_◉  📖',
-    '◉_◉  📖',
-    '◔_◉  📖',
-    '◔_◔  📖',
-    '◉_◔  📖',
-    '◉_◉  📖',
-    '◔_◉  📖',
-    '◔_◔  📖',
-];
-// Writing/Editing animation - typing
-const WRITING_FRAMES = [
-    '✍️ ▁',
-    '✍️ ▂',
-    '✍️ ▃',
-    '✍️ ▄',
-    '✍️ ▅',
-    '✍️ ▆',
-    '✍️ ▇',
-    '✍️ █',
-];
-// Searching/Grep animation - magnifying glass scanning
-const SEARCHING_FRAMES = [
-    '🔍 ░░░░░░░░',
-    '🔍 █░░░░░░░',
-    '🔍 ░█░░░░░░',
-    '🔍 ░░█░░░░░',
-    '🔍 ░░░█░░░░',
-    '🔍 ░░░░█░░░',
-    '🔍 ░░░░░█░░',
-    '🔍 ░░░░░░█░',
-    '🔍 ░░░░░░░█',
-    '🔍 ░░░░░░░░',
-];
-// Agent working animation - robot busy
-const AGENT_FRAMES = [
-    '🤖 ⚡',
-    '🤖  ⚡',
-    '🤖   ⚡',
-    '🤖    ⚡',
-    '🤖   ⚡',
-    '🤖  ⚡',
-    '🤖 ⚡',
-    '🤖⚡',
-];
-// Bash/Command running animation - terminal cursor
-const BASH_FRAMES = [
-    '▶ ░░░░░░░░ ▮',
-    '▶ █░░░░░░░ ▯',
-    '▶ ██░░░░░░ ▮',
-    '▶ ███░░░░░ ▯',
-    '▶ ████░░░░ ▮',
-    '▶ █████░░░ ▯',
-    '▶ ██████░░ ▮',
-    '▶ ███████░ ▯',
-    '▶ ████████ ▮',
-    '▶ ░████████ ▯',
-];
-// Web fetch animation - data flowing
-const FETCH_FRAMES = [
-    '🌐 ·····',
-    '🌐 ○····',
-    '🌐 ·○···',
-    '🌐 ··○··',
-    '🌐 ···○·',
-    '🌐 ····○',
-    '🌐 ·····',
-    '🌐 ●····',
-];
-// High context pressure animation - warning pulse
-const PRESSURE_FRAMES = [
-    '⚠️  CONTEXT HIGH',
-    '⚠️  CONTEXT HIGH',
-    '⚡  CONTEXT HIGH',
-    '⚡  CONTEXT HIGH',
-    '🔥 CONTEXT HIGH',
-    '🔥 CONTEXT HIGH',
-    '⚡  CONTEXT HIGH',
-    '⚡  CONTEXT HIGH',
-];
-// Todo progress animation - progress indicator
-const PROGRESS_FRAMES = [
-    '📋 ▱▱▱',
-    '📋 ▰▱▱',
-    '📋 ▰▰▱',
-    '📋 ▰▰▰',
-    '📋 ▰▰▱',
-    '📋 ▰▱▱',
-];
-// Success/Completion animation - celebration
-const SUCCESS_FRAMES = [
-    '✨ ᕙ(⇀‸↼‶)ᕗ ✨',
-    '✨ ᕙ(⇀‸↼‶)ᕗ  ✨',
-    '✨  ᕙ(⇀‸↼‶)ᕗ ✨',
-    '✨ ᕙ(⇀‸↼‶)ᕗ ✨',
-    '🎉 ᕙ(⇀‸↼‶)ᕗ 🎉',
-    '🎉 ᕙ(⇀‸↼‶)ᕗ 🎉',
-    '✨ ᕙ(⇀‸↼‶)ᕗ ✨',
-    '✨ ᕙ(⇀‸↼‶)ᕗ ✨',
-];
-// Idle animation - peaceful waiting
-const IDLE_FRAMES = [
-    '😴 z',
-    '😴 zz',
-    '😴 zzz',
-    '😴 zzzz',
-    '😴 zzz',
-    '😴 zz',
-    '😴 z',
-    '😴 ',
-];
-// Map states to animations
-const ANIMATION_MAP = {
-    idle: IDLE_FRAMES,
-    thinking: THINKING_FRAMES,
-    reading: READING_FRAMES,
-    writing: WRITING_FRAMES,
-    searching: SEARCHING_FRAMES,
-    agent: AGENT_FRAMES,
-    bash: BASH_FRAMES,
-    fetch: FETCH_FRAMES,
-    pressure: PRESSURE_FRAMES,
-    progress: PROGRESS_FRAMES,
-    success: SUCCESS_FRAMES,
+// =============================================================================
+// THE CHARACTER: A little coding companion
+// =============================================================================
+// Using a cute minimalist design that's expressive and fun to watch
+// Character faces - for different moods
+const FACES = {
+    happy: ['(◠‿◠)', '(◠◡◠)', '(◠‿◠)', '(◠◡◠)'],
+    focused: ['(•̀ᴗ•́)', '(•̀_•́)', '(•̀ᴗ•́)', '(•̀_•́)'],
+    thinking: ['(°ー°)', '(°-°)', '(°ー°)', '(°_°)'],
+    surprised: ['(°o°)', '(°O°)', '(°o°)', '(°O°)'],
+    sleepy: ['(－‿－)', '(－_－)', '(－‿－)', '(￣o￣)'],
+    excited: ['(★‿★)', '(★ω★)', '(☆‿☆)', '(☆ω☆)'],
+    stressed: ['(°△°)', '(°□°)', '(°△°)', '(>_<)'],
+    proud: ['(•̀ᴗ•́)b', '(•̀ᴗ•́)d', '(•̀ᴗ•́)b', '(≧◡≦)'],
 };
-// Map states to colors
+// =============================================================================
+// IDLE ANIMATIONS - Character living and breathing
+// =============================================================================
+const IDLE_SEQUENCES = [
+    // Relaxed sitting, looking around
+    [
+        '     ☁          ',
+        '    (◠‿◠)    ♪  ',
+        '    /|  |\\      ',
+        '    _|  |_  ☕   ',
+    ],
+    [
+        '      ☁         ',
+        '    (◠◡◠)   ♪   ',
+        '    /|  |\\      ',
+        '    _|  |_  ☕   ',
+    ],
+    [
+        '       ☁        ',
+        '    (◠‿◠)  ♫    ',
+        '    /|  |\\      ',
+        '    _|  |_  ☕   ',
+    ],
+    [
+        '        ☁       ',
+        '    (◠◡◠) ♪     ',
+        '    /|  |\\      ',
+        '    _|  |_  ☕   ',
+    ],
+    // Looking left
+    [
+        '    ☁           ',
+        '  ◟(◠‿◠)        ',
+        '    /|  |\\      ',
+        '    _|  |_  ☕   ',
+    ],
+    [
+        '   ☁            ',
+        ' ◟(◠◡◠)         ',
+        '    /|  |\\      ',
+        '    _|  |_  ☕   ',
+    ],
+    // Looking right
+    [
+        '          ☁     ',
+        '      (◠‿◠)◞    ',
+        '      /|  |\\    ',
+        '      _|  |_ ☕  ',
+    ],
+    [
+        '           ☁    ',
+        '      (◠◡◠)◞    ',
+        '      /|  |\\    ',
+        '      _|  |_ ☕  ',
+    ],
+];
+// =============================================================================
+// SLEEPING ANIMATIONS - Peaceful rest
+// =============================================================================
+const SLEEP_SEQUENCES = [
+    [
+        '    ☾ ⭐         ',
+        '   (－‿－) z    ',
+        '    /|__|\\      ',
+        '   ～～～～～   ',
+    ],
+    [
+        '    ☾  ⭐        ',
+        '   (－_－) zz   ',
+        '    /|__|\\      ',
+        '   ～～～～～   ',
+    ],
+    [
+        '    ☾   ⭐       ',
+        '   (－‿－) zzz  ',
+        '    /|__|\\      ',
+        '   ～～～～～   ',
+    ],
+    [
+        '    ☾    ⭐      ',
+        '   (￣o￣) zzzz ',
+        '    /|__|\\      ',
+        '   ～～～～～   ',
+    ],
+    [
+        '    ☾   ⭐       ',
+        '   (－‿－) zzz  ',
+        '    /|__|\\      ',
+        '   ～～～～～   ',
+    ],
+    [
+        '    ☾  ⭐        ',
+        '   (－_－) zz   ',
+        '    /|__|\\      ',
+        '   ～～～～～   ',
+    ],
+];
+// =============================================================================
+// TYPING/CODING ANIMATIONS - Active coding
+// =============================================================================
+const TYPING_SEQUENCES = [
+    [
+        '   ┌──────┐     ',
+        '   │ ▓▒░░ │(•̀ᴗ•́)',
+        '   └──────┘ ⌨️💨',
+        '    _|  |_      ',
+    ],
+    [
+        '   ┌──────┐     ',
+        '   │ ▓▓▒░ │(•̀_•́)',
+        '   └──────┘⌨️ 💨',
+        '    _|  |_      ',
+    ],
+    [
+        '   ┌──────┐     ',
+        '   │ ▓▓▓▒ │(•̀ᴗ•́)',
+        '   └──────┘ ⌨️💨',
+        '    _|  |_      ',
+    ],
+    [
+        '   ┌──────┐     ',
+        '   │ ▓▓▓▓ │(•̀_•́)',
+        '   └──────┘⌨️ 💨',
+        '    _|  |_      ',
+    ],
+    [
+        '   ┌──────┐  ✨ ',
+        '   │ █▓▓▓ │(•̀ᴗ•́)',
+        '   └──────┘ ⌨️💨',
+        '    _|  |_      ',
+    ],
+    [
+        '   ┌──────┐ ✨  ',
+        '   │ ██▓▓ │(•̀_•́)',
+        '   └──────┘⌨️ 💨',
+        '    _|  |_      ',
+    ],
+];
+// =============================================================================
+// READING/SCANNING ANIMATIONS - Studying files
+// =============================================================================
+const READING_SEQUENCES = [
+    [
+        '   📂──────┐    ',
+        '   │◉_◉    │    ',
+        '   │ ▸ line 1   ',
+        '   └────────    ',
+    ],
+    [
+        '   📂──────┐    ',
+        '   │ ◉_◉   │    ',
+        '   │ ▸ line 2   ',
+        '   └────────    ',
+    ],
+    [
+        '   📂──────┐    ',
+        '   │  ◉_◉  │    ',
+        '   │ ▸ line 3   ',
+        '   └────────    ',
+    ],
+    [
+        '   📂──────┐    ',
+        '   │   ◉_◉ │    ',
+        '   │ ▸ line 4   ',
+        '   └────────    ',
+    ],
+    [
+        '   📂──────┐    ',
+        '   │  ◉_◉  │    ',
+        '   │ ▸ line 5   ',
+        '   └────────    ',
+    ],
+    [
+        '   📂──────┐    ',
+        '   │ ◉_◉   │    ',
+        '   │ ▸ line 6   ',
+        '   └────────    ',
+    ],
+];
+// =============================================================================
+// SEARCHING ANIMATIONS - Looking for something
+// =============================================================================
+const SEARCHING_SEQUENCES = [
+    [
+        '   🔍(°ー°)      ',
+        '   ░░░░░░░░░░   ',
+        '   Searching... ',
+        '                ',
+    ],
+    [
+        '    🔍(°-°)     ',
+        '   █░░░░░░░░░   ',
+        '   Searching..  ',
+        '                ',
+    ],
+    [
+        '     🔍(°ー°)   ',
+        '   ██░░░░░░░░   ',
+        '   Searching.   ',
+        '                ',
+    ],
+    [
+        '      🔍(°-°)   ',
+        '   ███░░░░░░░   ',
+        '   Searching    ',
+        '                ',
+    ],
+    [
+        '       🔍(°ー°) ',
+        '   ████░░░░░░   ',
+        '   Searching... ',
+        '                ',
+    ],
+    [
+        '        🔍(°-°) ',
+        '   █████░░░░░   ',
+        '   Searching..  ',
+        '                ',
+    ],
+    [
+        '         🔍(°ー°)',
+        '   ██████░░░░   ',
+        '   Searching.   ',
+        '                ',
+    ],
+    [
+        '        🔍(°-°) ',
+        '   ███████░░░   ',
+        '   Searching    ',
+        '                ',
+    ],
+    [
+        '       🔍(°ー°) ',
+        '   ████████░░   ',
+        '   Searching... ',
+        '                ',
+    ],
+    [
+        '      🔍(★‿★)!  ',
+        '   █████████░   ',
+        '   Found it!    ',
+        '                ',
+    ],
+];
+// =============================================================================
+// THINKING ANIMATIONS - Deep in thought
+// =============================================================================
+const THINKING_SEQUENCES = [
+    [
+        '        💭      ',
+        '       💭       ',
+        '    (°ー°)      ',
+        '    /|  |\\      ',
+    ],
+    [
+        '       💭       ',
+        '      💭 ?      ',
+        '    (°-°)       ',
+        '    /|  |\\      ',
+    ],
+    [
+        '      💭        ',
+        '     💭 ??      ',
+        '    (°ー°)      ',
+        '    /|  |\\      ',
+    ],
+    [
+        '     💭         ',
+        '    💭 ???      ',
+        '    (°_°)       ',
+        '    /|  |\\      ',
+    ],
+    [
+        '      💭        ',
+        '     💭 ??      ',
+        '    (°ー°)      ',
+        '    /|  |\\      ',
+    ],
+    [
+        '       💭       ',
+        '      💭 ?      ',
+        '    (°-°)       ',
+        '    /|  |\\      ',
+    ],
+    [
+        '        💭      ',
+        '       💭 !     ',
+        '    (°o°)       ',
+        '    /|  |\\      ',
+    ],
+    [
+        '         💡     ',
+        '        ✨      ',
+        '    (★‿★)       ',
+        '    /|  |\\      ',
+    ],
+];
+// =============================================================================
+// AGENT/ROBOT MODE - Spawning helpers
+// =============================================================================
+const AGENT_SEQUENCES = [
+    [
+        '  🤖═══(•̀ᴗ•́)   ',
+        '   ║    ║      ',
+        '   ▼    ▼      ',
+        '  [░░] [░░]    ',
+    ],
+    [
+        '  🤖═══(•̀_•́)   ',
+        '   ║    ║      ',
+        '   ▼    ▼      ',
+        '  [▒░] [░▒]    ',
+    ],
+    [
+        '  🤖═══(•̀ᴗ•́)   ',
+        '   ║    ║      ',
+        '   ▼    ▼      ',
+        '  [▓▒] [▒▓]    ',
+    ],
+    [
+        '  🤖═══(•̀_•́)   ',
+        '   ║    ║      ',
+        '   ▼    ▼      ',
+        '  [█▓] [▓█]    ',
+    ],
+    [
+        '  🤖═══(•̀ᴗ•́)   ',
+        '   ║    ║   ⚡ ',
+        '   ▼    ▼      ',
+        '  [██] [██]    ',
+    ],
+    [
+        '  🤖═══(★‿★)   ',
+        '   ║    ║  ⚡⚡',
+        '   ▼    ▼      ',
+        '  [██] [██] ✓  ',
+    ],
+];
+// =============================================================================
+// BASH/TERMINAL ANIMATIONS - Running commands
+// =============================================================================
+const BASH_SEQUENCES = [
+    [
+        '  ┌─────────┐   ',
+        '  │ $ _     │(•̀ᴗ•́)',
+        '  │         │   ',
+        '  └─────────┘   ',
+    ],
+    [
+        '  ┌─────────┐   ',
+        '  │ $ █     │(•̀_•́)',
+        '  │         │   ',
+        '  └─────────┘   ',
+    ],
+    [
+        '  ┌─────────┐   ',
+        '  │ $ run_  │(•̀ᴗ•́)',
+        '  │ ░░░░░░  │   ',
+        '  └─────────┘   ',
+    ],
+    [
+        '  ┌─────────┐   ',
+        '  │ $ run█  │(•̀_•́)',
+        '  │ ▒▒░░░░  │   ',
+        '  └─────────┘   ',
+    ],
+    [
+        '  ┌─────────┐   ',
+        '  │ $ run   │(•̀ᴗ•́)',
+        '  │ ▓▓▓▒░░  │   ',
+        '  └─────────┘   ',
+    ],
+    [
+        '  ┌─────────┐   ',
+        '  │ running │(•̀_•́)',
+        '  │ █████▓▒ │   ',
+        '  └─────────┘   ',
+    ],
+    [
+        '  ┌─────────┐   ',
+        '  │ done ✓  │(★‿★)',
+        '  │ ████████│   ',
+        '  └─────────┘   ',
+    ],
+];
+// =============================================================================
+// WEB FETCH ANIMATIONS - Getting data from the web
+// =============================================================================
+const FETCH_SEQUENCES = [
+    [
+        '  🌐 ─ ─ ─ ─ ─  ',
+        '       (°ー°)   ',
+        '  ○ · · · · ·   ',
+        '                ',
+    ],
+    [
+        '  🌐 ─ ─ ─ ─ ● ',
+        '       (°-°)    ',
+        '  · ○ · · · ·   ',
+        '                ',
+    ],
+    [
+        '  🌐 ─ ─ ─ ● ─  ',
+        '       (°ー°)   ',
+        '  · · ○ · · ·   ',
+        '                ',
+    ],
+    [
+        '  🌐 ─ ─ ● ─ ─  ',
+        '       (°-°)    ',
+        '  · · · ○ · ·   ',
+        '                ',
+    ],
+    [
+        '  🌐 ─ ● ─ ─ ─  ',
+        '       (°ー°)   ',
+        '  · · · · ○ ·   ',
+        '                ',
+    ],
+    [
+        '  🌐 ● ─ ─ ─ ─  ',
+        '       (°-°)    ',
+        '  · · · · · ○   ',
+        '                ',
+    ],
+    [
+        '  🌐 ═══════ 📦 ',
+        '       (★‿★)    ',
+        '  ● ● ● ● ● ●   ',
+        '                ',
+    ],
+];
+// =============================================================================
+// PRESSURE/STRESS ANIMATIONS - High context usage
+// =============================================================================
+const PRESSURE_SEQUENCES = [
+    [
+        '  ⚠️ CONTEXT ⚠️  ',
+        '    (°△°) 💦    ',
+        '   /|██|\\      ',
+        '   ▓▓▓▓▓▓▓▓▓▓  ',
+    ],
+    [
+        '  🔥 CONTEXT 🔥  ',
+        '    (°□°) 💦💦  ',
+        '   /|██|\\      ',
+        '   ▓▓▓▓▓▓▓▓▓▓  ',
+    ],
+    [
+        '  ⚠️ RUNNING ⚠️  ',
+        '    (>_<) 💦    ',
+        '   /|██|\\      ',
+        '   █▓▓▓▓▓▓▓▓▓  ',
+    ],
+    [
+        '  🔥  LOW   🔥  ',
+        '    (×_×) 💦💦  ',
+        '   /|██|\\      ',
+        '   ██▓▓▓▓▓▓▓▓  ',
+    ],
+    [
+        '  ⚠️ COMPACT ⚠️  ',
+        '    (°△°) 💦    ',
+        '   /|██|\\      ',
+        '   ███▓▓▓▓▓▓▓  ',
+    ],
+    [
+        '  🔥  SOON  🔥  ',
+        '    (°□°) 💦💦  ',
+        '   /|██|\\      ',
+        '   ████▓▓▓▓▓▓  ',
+    ],
+];
+// =============================================================================
+// SUCCESS ANIMATIONS - Task completion celebration
+// =============================================================================
+const SUCCESS_SEQUENCES = [
+    [
+        '      ✨        ',
+        '    \\(★‿★)/    ',
+        '      │        ',
+        '     / \\       ',
+    ],
+    [
+        '    ✨  ✨      ',
+        '   \\(★ω★)/     ',
+        '      │        ',
+        '     / \\       ',
+    ],
+    [
+        '   ✨ 🎉 ✨     ',
+        '   \\(☆‿☆)/    ',
+        '      │        ',
+        '     / \\       ',
+    ],
+    [
+        '  ✨  🎉  ✨    ',
+        '  \\(≧◡≦)/     ',
+        '      │        ',
+        '     / \\       ',
+    ],
+    [
+        ' ✨ 🎉🎊🎉 ✨   ',
+        '  \\(★‿★)/     ',
+        '      │        ',
+        '     / \\       ',
+    ],
+    [
+        '   🎊🎉🎊      ',
+        '    (•̀ᴗ•́)b     ',
+        '     /|\\       ',
+        '     / \\       ',
+    ],
+];
+const SEQUENCE_MAP = {
+    idle: IDLE_SEQUENCES,
+    sleeping: SLEEP_SEQUENCES,
+    thinking: THINKING_SEQUENCES,
+    reading: READING_SEQUENCES,
+    writing: TYPING_SEQUENCES,
+    searching: SEARCHING_SEQUENCES,
+    agent: AGENT_SEQUENCES,
+    bash: BASH_SEQUENCES,
+    fetch: FETCH_SEQUENCES,
+    pressure: PRESSURE_SEQUENCES,
+    success: SUCCESS_SEQUENCES,
+};
+// =============================================================================
+// COLOR MAPPING FOR STATES
+// =============================================================================
 function colorForState(state, text) {
     switch (state) {
         case 'idle':
+            return dim(text);
+        case 'sleeping':
             return dim(text);
         case 'thinking':
             return cyan(text);
@@ -176,65 +587,55 @@ function colorForState(state, text) {
             return cyan(text);
         case 'pressure':
             return red(text);
-        case 'progress':
-            return yellow(text);
         case 'success':
             return green(text);
         default:
             return text;
     }
 }
+// =============================================================================
+// MAIN ANIMATION FUNCTIONS
+// =============================================================================
 /**
- * Get the current animation frame for a given state
+ * Get a single-line compact animation for the state
+ * (For when vertical space is limited)
  */
-export function getAnimationFrame(state, speed = 1) {
-    const frames = ANIMATION_MAP[state];
-    const frameIndex = getFrame(frames.length, speed);
-    return colorForState(state, frames[frameIndex]);
+export function getCompactAnimation(state) {
+    const sequences = SEQUENCE_MAP[state];
+    const frameIndex = getFrame(sequences.length);
+    // Return just the main "face" line (usually line 2)
+    const frame = sequences[frameIndex];
+    const mainLine = frame[1] || frame[0];
+    return colorForState(state, mainLine.trim());
 }
 /**
- * Get animated spinner (replaces static ◐)
+ * Get full multi-line animation frame
+ * Returns array of lines for the complete character scene
  */
-const SPINNER_FRAMES = ['◐', '◓', '◑', '◒'];
+export function getFullAnimation(state) {
+    const sequences = SEQUENCE_MAP[state];
+    const frameIndex = getFrame(sequences.length);
+    const frame = sequences[frameIndex];
+    return frame.map((line) => colorForState(state, line));
+}
+/**
+ * Get animation as a single joined string (for simple rendering)
+ */
+export function getAnimationBlock(state) {
+    return getFullAnimation(state).join('\n');
+}
+// =============================================================================
+// LEGACY COMPATIBILITY - Single line animations for existing code
+// =============================================================================
+export function getAnimationFrame(state, _speed) {
+    return getCompactAnimation(state);
+}
 export function getSpinner(startTime) {
+    const SPINNER_FRAMES = ['◐', '◓', '◑', '◒'];
     if (startTime) {
-        return SPINNER_FRAMES[getFrameFromStart(startTime, SPINNER_FRAMES.length, 2)];
+        const elapsed = Date.now() - startTime.getTime();
+        return SPINNER_FRAMES[Math.floor((elapsed / 100) % SPINNER_FRAMES.length)];
     }
     return SPINNER_FRAMES[getFrame(SPINNER_FRAMES.length, 2)];
-}
-/**
- * Get animated progress bar
- */
-const PROGRESS_BAR_FRAMES = ['▱▱▱▱▱', '▰▱▱▱▱', '▰▰▱▱▱', '▰▰▰▱▱', '▰▰▰▰▱', '▰▰▰▰▰', '▰▰▰▰▱', '▰▰▰▱▱', '▰▰▱▱▱', '▰▱▱▱▱'];
-export function getProgressAnimation() {
-    return PROGRESS_BAR_FRAMES[getFrame(PROGRESS_BAR_FRAMES.length)];
-}
-/**
- * Get a wave animation for context bar enhancement
- */
-const WAVE_CHARS = ['░', '▒', '▓', '█', '▓', '▒'];
-export function getWaveChar(position) {
-    const offset = getFrame(WAVE_CHARS.length);
-    return WAVE_CHARS[(position + offset) % WAVE_CHARS.length];
-}
-/**
- * Create an animated bar (alternative to static coloredBar)
- */
-export function animatedBar(percent, width = 10) {
-    const filled = Math.round((percent / 100) * width);
-    let bar = '';
-    for (let i = 0; i < width; i++) {
-        if (i < filled) {
-            bar += '█';
-        }
-        else if (i === filled) {
-            // Animate the edge
-            bar += getWaveChar(i);
-        }
-        else {
-            bar += '░';
-        }
-    }
-    return bar;
 }
 //# sourceMappingURL=animations.js.map

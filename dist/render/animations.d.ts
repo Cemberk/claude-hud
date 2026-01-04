@@ -1,21 +1,26 @@
 /**
- * Get current animation frame index based on time
+ * Get current animation frame index based on time (stateless)
  */
-export declare function getFrame(frameCount: number, speed?: number): number;
+export declare function getFrame(frameCount: number, speedMultiplier?: number): number;
 /**
- * Get frame based on a specific start time (for tool/agent-specific animations)
+ * Get a secondary offset frame for layered animations
  */
-export declare function getFrameFromStart(startTime: Date, frameCount: number, speed?: number): number;
-export type ActivityState = 'idle' | 'thinking' | 'reading' | 'writing' | 'searching' | 'agent' | 'bash' | 'fetch' | 'pressure' | 'progress' | 'success';
+export declare function getOffsetFrame(frameCount: number, offset?: number): number;
+export type ActivityState = 'idle' | 'sleeping' | 'thinking' | 'reading' | 'writing' | 'searching' | 'agent' | 'bash' | 'fetch' | 'pressure' | 'success';
 /**
- * Get the current animation frame for a given state
+ * Get a single-line compact animation for the state
+ * (For when vertical space is limited)
  */
-export declare function getAnimationFrame(state: ActivityState, speed?: number): string;
+export declare function getCompactAnimation(state: ActivityState): string;
+/**
+ * Get full multi-line animation frame
+ * Returns array of lines for the complete character scene
+ */
+export declare function getFullAnimation(state: ActivityState): string[];
+/**
+ * Get animation as a single joined string (for simple rendering)
+ */
+export declare function getAnimationBlock(state: ActivityState): string;
+export declare function getAnimationFrame(state: ActivityState, _speed?: number): string;
 export declare function getSpinner(startTime?: Date): string;
-export declare function getProgressAnimation(): string;
-export declare function getWaveChar(position: number): string;
-/**
- * Create an animated bar (alternative to static coloredBar)
- */
-export declare function animatedBar(percent: number, width?: number): string;
 //# sourceMappingURL=animations.d.ts.map
