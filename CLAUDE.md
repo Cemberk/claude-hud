@@ -61,11 +61,13 @@ src/
 ├── config-reader.ts   # Read MCP/rules configs
 ├── types.ts           # TypeScript interfaces
 └── render/
-    ├── index.ts       # Main render coordinator
+    ├── index.ts          # Main render coordinator
     ├── session-line.ts   # Line 1: model, context, rules, MCPs
-    ├── tools-line.ts     # Line 2: tool activity
-    ├── agents-line.ts    # Line 3: agent status
-    ├── todos-line.ts     # Line 4: todo progress
+    ├── animation-line.ts # Line 2 (opt): dynamic activity animation
+    ├── animations.ts     # Animation frames and utilities
+    ├── tools-line.ts     # Tool activity
+    ├── agents-line.ts    # Agent status
+    ├── todos-line.ts     # Todo progress
     └── colors.ts         # ANSI color helpers
 ```
 
@@ -92,6 +94,48 @@ Lines are conditionally shown:
 | 70-85% | Yellow | Warning |
 | >85% | Red | Show token breakdown |
 | >95% | Red | Show ⚠️ COMPACT |
+
+## Animation Mode
+
+Enable entertaining animations that change based on Claude's activity:
+
+```bash
+# Enable via environment variable in settings.json statusLine config
+CLAUDE_HUD_ANIMATE=1
+
+# Optional: Use compact single-line mode instead of full multi-line
+CLAUDE_HUD_COMPACT=1
+```
+
+### Tamagotchi Display (Full Mode)
+
+The full animation mode displays a 4-line ASCII character scene that changes based on activity:
+
+```
+    ☾   ⭐
+   (－‿－) zzz
+    /|__|\\
+   ～～～～～
+─ Waiting for input
+```
+
+### Animation States
+
+| State | Character | Trigger |
+|-------|-----------|---------|
+| 😴 Sleeping | `(－‿－) zzz` | Waiting for input |
+| ☁️ Idle | `(◠‿◠) ♪` | Ready, no activity |
+| 💭 Thinking | `(°ー°) ???` | Processing between tools |
+| 📖 Reading | `◉_◉` scanning | Read, Glob, ls |
+| ✍️ Writing | `(•̀ᴗ•́)` at screen | Write, Edit, MultiEdit |
+| 🔍 Searching | Moving magnifier | Grep, search operations |
+| 🤖 Agent | Robot spawning | Task subagent running |
+| ▶ Bash | Terminal progress | Shell command executing |
+| 🌐 Fetch | Data flowing | Web requests |
+| 🔥 Pressure | `(×_×) 💦` stressed | Context usage >90% |
+| 🎉 Success | `\\(★‿★)/` celebrating | Task completion |
+
+Animations are time-based (derived from `Date.now()`) to work with the stateless ~300ms invocation cycle.
 
 ## Plugin Configuration
 
