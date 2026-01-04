@@ -63,8 +63,9 @@ src/
 └── render/
     ├── index.ts          # Main render coordinator
     ├── session-line.ts   # Line 1: model, context, rules, MCPs
-    ├── animation-line.ts # Line 2 (opt): dynamic activity animation
-    ├── animations.ts     # Animation frames and utilities
+    ├── animation-line.ts # Line 2 (opt): Tamagotchi animation
+    ├── animations.ts     # Tamagotchi frames and utilities
+    ├── mesmeric.ts       # Wave interference visualizer
     ├── tools-line.ts     # Tool activity
     ├── agents-line.ts    # Agent status
     ├── todos-line.ts     # Todo progress
@@ -136,6 +137,55 @@ The full animation mode displays a 4-line ASCII character scene that changes bas
 | 🎉 Success | `\\(★‿★)/` celebrating | Task completion |
 
 Animations are time-based (derived from `Date.now()`) to work with the stateless ~300ms invocation cycle.
+
+## Mesmeric Wave Mode
+
+An alternative visualization mode that creates mesmerizing wave interference patterns, inspired by Winamp visualizers and fire simulations.
+
+```bash
+# Enable via environment variable in settings.json statusLine config
+CLAUDE_HUD_MESMERIC=1
+
+# Combine with compact mode for single-line wave display
+CLAUDE_HUD_MESMERIC=1 CLAUDE_HUD_COMPACT=1
+```
+
+### Full Mesmeric Display
+
+The wave interference creates hypnotic ASCII patterns that respond to Claude's activity:
+
+```
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~≈≈≈≈≈≈≈≈≈≈≈≈
+~~~~~~~~~~~~~~~~~~~~~~~~~~╭───────╮~~~~~~~~~~~~~≈≈≈≈≈≈≈≈≈≈≈≈
+~~~~~~~~~~~~~~~~~~~~~~≈≈≈≈│ －   － │≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≋≋
+~~~~~~~~~~~~~~≈≈≈≈≈≈≈≈≈≈≈≈│   z   │≋≋≋≋≋≋≋≋≋≈≈≈≈≈≈≈≈≋≋≋≋≋≋≋≋
+≈≈~~~~~~~~~~~~~~≈≈≈≈≈≈≈≈≈≈╰───────╯≈≈≋≈≈≋≈≋≋≋≋≋≋≋≋≋≋≋≋≋≋≋≋≋≋
+─ SLEEP │ Waiting for input
+```
+
+### Mesmeric Modes
+
+| Mode | Visual | Trigger |
+|------|--------|---------|
+| SLEEP | Gentle water waves (~≈≋) | Waiting for input |
+| IDLE | Soft flowing patterns | Ready, no activity |
+| SCAN | Matrix-like ripples | Read, Grep, search |
+| BUILD | Rising constructive waves | Write, Edit operations |
+| CRUNCH | Intense fire patterns (░▒▓█) | Bash, Agent, heavy processing |
+| PRESSURE | Chaotic flames | Context >90% |
+| SUCCESS | Calm expanding patterns | Task completion |
+
+### Technical Details
+
+The mesmeric visualizer uses mathematical wave interference:
+- Multi-layered sine waves with configurable resonance
+- Radial ripples from center point
+- Entropy (controlled noise) for texture
+- Character palette mapping for ASCII gradients
+- Time-based animation that's stateless (works with 300ms invocation cycle)
+
+Each mode has parameters: `entropy`, `gravity`, `velocity`, `resonance`, `zoom`, `waveCount` that create distinct visual behaviors.
 
 ## Plugin Configuration
 
