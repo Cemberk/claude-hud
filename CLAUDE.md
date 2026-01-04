@@ -61,11 +61,13 @@ src/
 ├── config-reader.ts   # Read MCP/rules configs
 ├── types.ts           # TypeScript interfaces
 └── render/
-    ├── index.ts       # Main render coordinator
+    ├── index.ts          # Main render coordinator
     ├── session-line.ts   # Line 1: model, context, rules, MCPs
-    ├── tools-line.ts     # Line 2: tool activity
-    ├── agents-line.ts    # Line 3: agent status
-    ├── todos-line.ts     # Line 4: todo progress
+    ├── animation-line.ts # Line 2 (opt): dynamic activity animation
+    ├── animations.ts     # Animation frames and utilities
+    ├── tools-line.ts     # Tool activity
+    ├── agents-line.ts    # Agent status
+    ├── todos-line.ts     # Todo progress
     └── colors.ts         # ANSI color helpers
 ```
 
@@ -92,6 +94,29 @@ Lines are conditionally shown:
 | 70-85% | Yellow | Warning |
 | >85% | Red | Show token breakdown |
 | >95% | Red | Show ⚠️ COMPACT |
+
+## Animation Mode
+
+Enable entertaining animations that change based on Claude's activity:
+
+```bash
+# Enable via environment variable in settings.json statusLine config
+CLAUDE_HUD_ANIMATE=1
+```
+
+Animation states:
+- 😴 **Idle**: Sleeping animation when waiting for input
+- (◠‿◠) **Thinking**: Processing between tool calls
+- ◉_◉ 📖 **Reading**: Scanning files (Read, Glob, ls)
+- ✍️ **Writing**: Editing files (Write, Edit, MultiEdit)
+- 🔍 **Searching**: Grep, search operations
+- 🤖 **Agent**: Subagent running
+- ▶ **Bash**: Terminal command executing
+- 🌐 **Fetch**: Web requests
+- 🔥 **Pressure**: Context usage >90%
+- ✨ **Success**: Task completion celebration
+
+Animations are time-based (derived from `Date.now()`) to work with the stateless ~300ms invocation cycle.
 
 ## Plugin Configuration
 
